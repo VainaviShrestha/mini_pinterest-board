@@ -2,11 +2,12 @@ const board = document.getElementById("board");
 const form = document.getElementById("addCardForm");
 const imageUrlInput = document.getElementById("imageUrl");
 const titleInput = document.getElementById("title");
+const imageFileInput = document.getElementById("imageFile");
 
 // Load saved cards from localStorage
 let cards = JSON.parse(localStorage.getItem("cards")) || [];
 
-// Drag & drop variables
+// Drag & drop variable
 let draggedIndex = null;
 
 // Render cards
@@ -19,7 +20,8 @@ function render() {
 
     div.innerHTML = `
       <img src="${card.image}" alt="${card.title}">
-      <div class="title">${card.title} 
+      <div class="title">
+        ${card.title} 
         <span class="heart ${card.liked ? "liked" : ""}" onclick="toggleLike(${index})">&#10084;</span>
       </div>
       <button onclick="deleteCard(${index})">Delete</button>
@@ -41,15 +43,43 @@ function render() {
 // Add new card
 form.addEventListener("submit", e => {
   e.preventDefault();
-  const image = imageUrlInput.value;
-  const title = titleInput.value;
 
-  cards.push({ image, title, liked: false });
-  saveAndRender();
+  const file = imageFileInput.files[0];
+  const url = imageUrlInput.value.trim();
+  const title = titleInput.value.trim();
 
+  if (!file && !url) {
+    alert("Please provide an image file or a URL.");
+    return;
+  }
+
+  if (!title) {
+    alert("Please provide a title.");
+    return;
+  }
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const image = event.target.result; // base64 string
+      addCard(image, title);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    addCard(url, title);
+  }
+
+  // Clear inputs
   imageUrlInput.value = "";
+  imageFileInput.value = "";
   titleInput.value = "";
 });
+
+// Function to add card
+function addCard(image, title) {
+  cards.push({ image, title, liked: false });
+  saveAndRender();
+}
 
 // Toggle like
 function toggleLike(index) {
@@ -65,7 +95,7 @@ function deleteCard(index) {
 
 // Swap cards for drag & drop
 function swapCards(from, to) {
-  if(from === null || to === null) return;
+  if (from === null || to === null) return;
   const temp = cards[from];
   cards[from] = cards[to];
   cards[to] = temp;

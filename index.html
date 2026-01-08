@@ -9,7 +9,8 @@
   <h1>Mini Pinterest Board</h1>
 
   <form id="addCardForm">
-    <input type="text" id="imageUrl" placeholder="Image URL" required>
+    <input type="file" id="imageFile" accept="image/*">
+    <input type="text" id="imageUrl" placeholder="Image URL">
     <input type="text" id="title" placeholder="Title" required>
     <button type="submit">Add Card</button>
   </form>
